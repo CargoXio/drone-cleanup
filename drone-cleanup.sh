@@ -6,7 +6,7 @@ if [ -z "$timeout" ]; then
     timeout=3600
 fi
 
-# Note that Alpine / Busybox does not suppoer "-v"
+# Note that Alpine / Busybox does not support "-v"
 # now=`date -v -${timeout}S -u +"%Y-%m-%dT%H:%M:%SZ"`
 then="$(( `date +%s`-${timeout} ))"
 now=`date -d@${then} -u +"%Y-%m-%dT%H:%M:%SZ"`
