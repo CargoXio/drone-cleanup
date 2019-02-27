@@ -46,7 +46,7 @@ spec:
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 3
-  schedule: 0 * */10 * *
+  schedule: 0 */10 * * *
   jobTemplate:
     metadata:
       creationTimestamp: null
