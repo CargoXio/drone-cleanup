@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drone-cleanup
+  namespace: drone
+
+---
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: drone-cleanup
+  namespace: drone
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["", "batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "delete"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: drone-cleanup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: drone-cleanup
+subjects:
+- kind: ServiceAccount
+  name: drone-cleanup
+
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  annotations:
+  name: drone-cleanup
+  namespace: drone
+spec:
+  suspend: false
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  schedule: 0 * */10 * *
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          serviceAccountName: drone-cleanup
+          containers:
+          - image: cargoxio/drone-cleanup:latest
+            imagePullPolicy: Always
+            name: drone-cleanup
+            command: [ "/bin/sh", "/kubectl/drone-cleanup.sh" ]
+            resources:
+              limits:
+                cpu: 50m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 100Mi
+            securityContext:
+              capabilities: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: Default
+          hostNetwork: true
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 10
