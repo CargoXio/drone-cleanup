@@ -33,7 +33,7 @@ for i in $jobs; do
 done
 
 echo "=== Deleting pods ==="
-pods=$(kubectl get pods --field-selector=status.phase!=Running --field-selector=status.phase!=Pending --field-selector=status.phase!=Pending -o jsonpath='{range .items[*]}{.status.startTime}{"|"}{.metadata.name}{"\n"}' | sort)
+pods=$(kubectl get pods --field-selector=status.phase!=Running,status.phase!=Pending,status.phase!=Pending -o jsonpath='{range .items[*]}{.status.startTime}{"|"}{.metadata.name}{"\n"}' | sort)
 for i in $pods; do
     time=$(echo "$i" | cut -f1 -d\|)
     name=$(echo "$i" | cut -f2 -d\|)
